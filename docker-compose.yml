@@ -4,7 +4,7 @@ services:
   crawler:
     image: webmotors-crawler:latest
     build:
-      context: https://${GITHUB_TOKEN}@github.com/geovannec/webmotors-analytics.git#main
+      context: https://github.com/geovannec/webmotors-analytics.git#main
       dockerfile: Dockerfile
     container_name: webmotors_crawler
     restart: always
@@ -15,7 +15,7 @@ services:
   dashboard:
     image: webmotors-dashboard:latest
     build:
-      context: https://${GITHUB_TOKEN}@github.com/geovannec/webmotors-analytics.git#main
+      context: https://github.com/geovannec/webmotors-analytics.git#main
       dockerfile: Dockerfile
     container_name: webmotors_dashboard
     restart: always
