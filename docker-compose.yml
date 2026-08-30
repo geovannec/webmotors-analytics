@@ -2,7 +2,10 @@ version: "3.8"
 
 services:
   crawler:
-    build: .
+    image: webmotors-crawler:latest
+    build:
+      context: https://${GITHUB_TOKEN}@github.com/geovannec/webmotors-analytics.git#main
+      dockerfile: Dockerfile
     container_name: webmotors_crawler
     restart: always
     command: python run_daemon.py --interval 3600 --tier 1 --brands-cat volume --pages-per-shard 2
@@ -10,7 +13,10 @@ services:
       - webmotors_data:/app/data
 
   dashboard:
-    build: .
+    image: webmotors-dashboard:latest
+    build:
+      context: https://${GITHUB_TOKEN}@github.com/geovannec/webmotors-analytics.git#main
+      dockerfile: Dockerfile
     container_name: webmotors_dashboard
     restart: always
     command: streamlit run app/dashboard.py --server.port 8501 --server.address 0.0.0.0
