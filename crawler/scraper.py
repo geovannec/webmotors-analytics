@@ -7,6 +7,12 @@ import requests
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright, Page, Response
 
+try:
+    from curl_cffi import requests as cffi_requests
+    HAS_CURL_CFFI = True
+except ImportError:
+    HAS_CURL_CFFI = False
+
 from config.settings import DEFAULT_UF, DEFAULT_CITY, DEFAULT_DELAY_MIN, DEFAULT_DELAY_MAX, USER_AGENT
 from crawler.browser import BrowserFactory
 from crawler.parser import WebmotorsParser
@@ -20,7 +26,10 @@ class WebmotorsScraper:
     def __init__(self, db_manager: Optional[DatabaseManager] = None):
         self.db = db_manager or DatabaseManager()
         self.intercepted_items: List[Dict[str, Any]] = []
-        self.http_session = requests.Session()
+        if HAS_CURL_CFFI:
+            self.http_session = cffi_requests.Session()
+        else:
+            self.http_session = requests.Session()
 
     def scrape_api_page(
         self,
@@ -31,7 +40,7 @@ class WebmotorsScraper:
     ) -> List[Dict[str, Any]]:
         """
         Extrai anúncios diretamente do endpoint JSON da Webmotors.
-        Imune a desafios de bot do navegador e com velocidade 50x superior.
+        Utiliza TLS fingerprint impersonation do Chrome via curl_cffi quando disponível.
         """
         base_search_url = f"https://www.webmotors.com.br/carros/{uf.lower()}"
         if marca:
@@ -45,14 +54,18 @@ class WebmotorsScraper:
         api_url = f"https://www.webmotors.com.br/api/search/car?url={inner_url}&actualPage={pagina}"
 
         headers = {
-            "User-Agent": USER_AGENT,
             "Accept": "application/json, text/plain, */*",
             "Referer": inner_url,
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         }
 
         try:
-            resp = self.http_session.get(api_url, headers=headers, timeout=15)
+            if HAS_CURL_CFFI:
+                resp = self.http_session.get(api_url, headers=headers, impersonate="chrome124", timeout=15)
+            else:
+                headers["User-Agent"] = USER_AGENT
+                resp = self.http_session.get(api_url, headers=headers, timeout=15)
+
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("SearchResults", []) or []
