@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  crawler:
+    image: webmotors-crawler:latest
+    build:
+      context: https://github.com/geovannec/webmotors-analytics.git#main
+      dockerfile: Dockerfile
+    container_name: webmotors_crawler
+    restart: always
+    command: python run_daemon.py --interval 3600 --tier 1 --brands-cat volume --pages-per-shard 2
+    volumes:
+      - webmotors_data:/app/data
+
+  dashboard:
+    image: webmotors-dashboard:latest
+    build:
+      context: https://github.com/geovannec/webmotors-analytics.git#main
+      dockerfile: Dockerfile
+    container_name: webmotors_dashboard
+    restart: always
+    command: streamlit run app/dashboard.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - webmotors_data:/app/data
+
+volumes:
+  webmotors_data:
