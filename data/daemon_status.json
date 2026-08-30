@@ -1,0 +1,20 @@
+{
+  "status": "AGUARDANDO",
+  "pid": 42351,
+  "intervalo_minutos": 60,
+  "ultima_atualizacao": "2026-08-30T19:33:26.323414",
+  "ciclos_completados": 1,
+  "total_coletados_acumulado": 1800,
+  "total_novos_acumulado": 1,
+  "total_atualizados_acumulado": 0,
+  "ultimo_ciclo_inicio": "2026-08-30T19:28:17.086565",
+  "ultimo_ciclo_fim": "2026-08-30T19:33:26.323404",
+  "proximo_ciclo": "2026-08-30T20:28:17.086553",
+  "ultimo_resultado": {
+    "total_coletados": 1800,
+    "novos_inseridos": 1,
+    "atualizados": 0,
+    "shards_concluidos": 90,
+    "total_shards": 90
+  }
+}

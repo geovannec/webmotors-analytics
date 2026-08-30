@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.webmotors.analytics.daemon</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/gcaraciola/Documents/Trabalho/Projetos/WebMotors Analytics/.venv/bin/python</string>
+        <string>/Users/gcaraciola/Documents/Trabalho/Projetos/WebMotors Analytics/run_daemon.py</string>
+        <string>--interval</string>
+        <string>3600</string>
+        <string>--tier</string>
+        <string>1</string>
+        <string>--brands-cat</string>
+        <string>volume</string>
+        <string>--pages-per-shard</string>
+        <string>2</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/gcaraciola/Documents/Trabalho/Projetos/WebMotors Analytics</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/gcaraciola/Documents/Trabalho/Projetos/WebMotors Analytics/data/daemon_stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/gcaraciola/Documents/Trabalho/Projetos/WebMotors Analytics/data/daemon_stderr.log</string>
+</dict>
+</plist>
