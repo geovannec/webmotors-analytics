@@ -1,5 +1,5 @@
 /**
- * WebMotors Reconstructed + Embedded Analytics - App Logic
+ * WebMotors Reconstructed + Embedded Analytics, Logistics & TCO - App Logic
  */
 
 const state = {
@@ -16,6 +16,15 @@ const state = {
   sort: 'deal_desc',
   page: 1,
   limit: 18,
+  travel: {
+    user_city: localStorage.getItem('wm_user_city') || 'São Paulo',
+    user_uf: localStorage.getItem('wm_user_uf') || 'SP',
+    fuel_type: localStorage.getItem('wm_fuel_type') || 'GASOLINA',
+    fuel_price: parseFloat(localStorage.getItem('wm_fuel_price') || '6.10'),
+    km_per_liter: parseFloat(localStorage.getItem('wm_km_per_l') || '12.0'),
+    toll_per_100km: parseFloat(localStorage.getItem('wm_toll') || '16.0'),
+    extra_costs: parseFloat(localStorage.getItem('wm_extra') || '150.0'),
+  }
 };
 
 let debounceTimer = null;
@@ -25,11 +34,20 @@ let depreciationChart = null;
 // 1. INICIALIZAÇÃO E CARREGAMENTO DE METADADOS
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
+  updateNavTravelSummary();
   initEventListeners();
   await loadSummary();
   await loadFacets();
+  await loadCities();
   await fetchCars();
 });
+
+function updateNavTravelSummary() {
+  const el = document.getElementById('navTravelSummary');
+  if (el) {
+    el.innerHTML = `📍 Origem: <strong>${state.travel.user_city} (${state.travel.user_uf})</strong> • ${state.travel.fuel_type} (${state.travel.km_per_liter} km/l)`;
+  }
+}
 
 async function loadSummary() {
   try {
@@ -80,15 +98,28 @@ async function loadFacets() {
   }
 }
 
+async function loadCities() {
+  try {
+    const res = await fetch('/api/cities');
+    const data = await res.json();
+    const list = document.getElementById('citiesList');
+    if (list && data.cities) {
+      list.innerHTML = data.cities.map(c => `<option value="${c}">`).join('');
+    }
+  } catch (err) {
+    console.error('Erro ao carregar cidades:', err);
+  }
+}
+
 // ==========================================================================
-// 2. BUSCA E RENDERIZAÇÃO DE ANÚNCIOS (CARDS WEBMOTORS)
+// 2. BUSCA E RENDERIZAÇÃO DE ANÚNCIOS (CARDS WEBMOTORS COM VIAGEM E TCO)
 // ==========================================================================
 async function fetchCars() {
   const grid = document.getElementById('carGrid');
   grid.innerHTML = `
     <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
       <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--wm-red); margin-bottom: 12px;"></i>
-      <p style="font-weight: 600;">Carregando os melhores veículos com análise de mercado...</p>
+      <p style="font-weight: 600;">Calculando as melhores ofertas, custos de viagem e manutenção...</p>
     </div>
   `;
 
@@ -106,6 +137,15 @@ async function fetchCars() {
   params.append('sort', state.sort);
   params.append('page', state.page);
   params.append('limit', state.limit);
+
+  // Parâmetros de Viagem & Origem do Usuário
+  params.append('user_city', state.travel.user_city);
+  params.append('user_uf', state.travel.user_uf);
+  params.append('fuel_type', state.travel.fuel_type);
+  params.append('fuel_price', state.travel.fuel_price);
+  params.append('km_per_liter', state.travel.km_per_liter);
+  params.append('toll_per_100km', state.travel.toll_per_100km);
+  params.append('extra_costs', state.travel.extra_costs);
 
   try {
     const res = await fetch(`/api/cars?${params.toString()}`);
@@ -161,6 +201,29 @@ function renderCarCard(car) {
     ? `Economia de ${(car.preco_mercado - car.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}`
     : `Média de Mercado: ${car.preco_mercado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}`;
 
+  // Informações de Viagem & Logística
+  const v = car.viagem;
+  const tripWidgetHtml = `
+    <div class="wm-card-trip-widget">
+      <div class="wm-trip-row-top">
+        <span><i class="fa-solid fa-route"></i> ${v.distancia_km} km de você (${v.distancia_ida_volta_km || v.distancia_km} km ida/volta)</span>
+        <span class="wm-trip-cost-tag">Viagem: R$ ${v.custo_total_viagem.toLocaleString('pt-BR')}</span>
+      </div>
+      <div class="wm-trip-verdict-banner ${v.veredito.cor}">
+        <i class="fa-solid fa-flag-checkered"></i> ${v.veredito.titulo}
+      </div>
+    </div>
+  `;
+
+  // Informações de Custo de Posse (TCO)
+  const tco = car.tco;
+  const tcoWidgetHtml = `
+    <div class="wm-card-tco-widget" title="Seguro: R$ ${tco.detalhamento_mensal.seguro}/mês • IPVA: R$ ${tco.detalhamento_mensal.ipva}/mês • Manutenção: R$ ${tco.detalhamento_mensal.manutencao}/mês • Combustível: R$ ${tco.detalhamento_mensal.combustivel}/mês">
+      <span class="wm-card-tco-title"><i class="fa-solid fa-wrench"></i> Custo de Manter:</span>
+      <span class="wm-card-tco-val">R$ ${tco.custo_total_mensal.toLocaleString('pt-BR')} / mês</span>
+    </div>
+  `;
+
   return `
     <div class="wm-card">
       <div class="wm-card-media">
@@ -195,6 +258,10 @@ function renderCarCard(car) {
           <span class="wm-spread-diff ${diffClass}">${diffText}</span>
         </div>
 
+        <!-- Widgets de Logística de Viagem & Custo de Manter (TCO) -->
+        ${tripWidgetHtml}
+        ${tcoWidgetHtml}
+
         <div class="wm-card-specs">
           <span><i class="fa-regular fa-calendar"></i> ${car.ano_fabricacao}/${car.ano_modelo}</span>
           <span><i class="fa-solid fa-gauge-high"></i> ${kmFmt}</span>
@@ -206,7 +273,7 @@ function renderCarCard(car) {
             Ver Detalhes
           </button>
           <button class="wm-btn-analytics" onclick="openCarModal('${car.id_anuncio}')">
-            <i class="fa-solid fa-chart-simple"></i> Raio-X
+            <i class="fa-solid fa-chart-simple"></i> Raio-X & Viagem
           </button>
         </div>
       </div>
@@ -215,7 +282,7 @@ function renderCarCard(car) {
 }
 
 // ==========================================================================
-// 3. MODAL DE DETALHES DO VEÍCULO & RAIO-X ANALÍTICO
+// 3. MODAL DE DETALHES DO VEÍCULO & RAIO-X ANALÍTICO + VIAGEM + TCO
 // ==========================================================================
 async function openCarModal(id_anuncio) {
   const modal = document.getElementById('carModal');
@@ -224,17 +291,28 @@ async function openCarModal(id_anuncio) {
   modalBody.innerHTML = `
     <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
       <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color: var(--wm-red); margin-bottom: 16px;"></i>
-      <p style="font-weight: 700; font-size: 1.1rem;">Carregando Raio-X Analítico e Ficha Técnica...</p>
+      <p style="font-weight: 700; font-size: 1.1rem;">Calculando Raio-X de Viagem, Manutenção e Mercado...</p>
     </div>
   `;
   modal.classList.add('open');
 
+  const params = new URLSearchParams();
+  params.append('user_city', state.travel.user_city);
+  params.append('user_uf', state.travel.user_uf);
+  params.append('fuel_type', state.travel.fuel_type);
+  params.append('fuel_price', state.travel.fuel_price);
+  params.append('km_per_liter', state.travel.km_per_liter);
+  params.append('toll_per_100km', state.travel.toll_per_100km);
+  params.append('extra_costs', state.travel.extra_costs);
+
   try {
-    const res = await fetch(`/api/cars/${id_anuncio}`);
+    const res = await fetch(`/api/cars/${id_anuncio}?${params.toString()}`);
     if (!res.ok) throw new Error('Não foi possível carregar os detalhes do carro.');
     const data = await res.json();
     const c = data.car;
     const a = data.analytics;
+    const v = a.viagem;
+    const t = a.tco;
 
     const precoFmt = c.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
     const mediaFmt = a.media_mercado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
@@ -308,12 +386,94 @@ async function openCarModal(id_anuncio) {
         </div>
       </div>
 
-      <!-- PAINEL EMBUTIDO DE ANALYTICS (RAIO-X DE MERCADO) -->
+      <!-- PAINEL EMBUTIDO DE ANALYTICS & LOGÍSTICA & TCO -->
       <div class="wm-analytics-drawer">
+        
+        <!-- SEÇÃO 1: CALCULADORA DE VIAGEM DE BUSCA -->
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 1.05rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-route" style="color: var(--wm-red);"></i> Logística de Viagem: Vale a pena buscar em ${c.cidade || c.estado}?
+            </div>
+            <div class="wm-trip-verdict-banner ${v.veredito.cor}" style="font-size: 0.82rem; padding: 6px 12px;">
+              <i class="fa-solid fa-flag-checkered"></i> ${v.veredito.titulo}
+            </div>
+          </div>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 6px;">
+            Sua Origem: <strong>${state.travel.user_city} (${state.travel.user_uf})</strong> ➔ Destino do Carro: <strong>${c.cidade ? `${c.cidade} - ${c.estado}` : c.estado}</strong>
+          </p>
+
+          <div class="wm-travel-breakdown-grid">
+            <div class="wm-breakdown-box">
+              <span class="wm-breakdown-lbl">Distância Total</span>
+              <span class="wm-breakdown-val">${v.distancia_km} km <small style="font-size: 0.7rem; color: var(--text-muted);">(${v.distancia_ida_volta_km || v.distancia_km} km ida/volta)</small></span>
+            </div>
+            <div class="wm-breakdown-box">
+              <span class="wm-breakdown-lbl">Combustível (${v.litros_combustivel || 0} L)</span>
+              <span class="wm-breakdown-val">R$ ${(v.custo_combustivel || 0).toLocaleString('pt-BR')}</span>
+            </div>
+            <div class="wm-breakdown-box">
+              <span class="wm-breakdown-lbl">Pedágios Estimados</span>
+              <span class="wm-breakdown-val">R$ ${(v.custo_pedagios || 0).toLocaleString('pt-BR')}</span>
+            </div>
+            <div class="wm-breakdown-box" style="border-color: #A7F3D0; background: #ECFDF5;">
+              <span class="wm-breakdown-lbl" style="color: #065F46;">Custo Total da Viagem</span>
+              <span class="wm-breakdown-val" style="color: #065F46;">R$ ${v.custo_total_viagem.toLocaleString('pt-BR')}</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 12px; background: #F8FAFC; border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Preço Efetivo do Carro na sua Garagem (Carro + Viagem):</span>
+            <strong style="font-size: 1rem; color: #0F172A;">R$ ${v.preco_total_efetivo.toLocaleString('pt-BR')}</strong>
+          </div>
+        </div>
+
+        <!-- SEÇÃO 2: CUSTO TOTAL DE POSSE (TCO - SEGURO, IPVA, MANUTENÇÃO) -->
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 1.05rem; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-wrench" style="color: #D97706;"></i> Custo de Manter o Carro (TCO Anual e Mensal)
+            </div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #B45309; background: #FEF3C7; padding: 4px 12px; border-radius: 6px;">
+              R$ ${t.custo_total_mensal.toLocaleString('pt-BR')} / mês <small style="font-size: 0.75rem; font-weight: 600;">(R$ ${t.custo_total_anual.toLocaleString('pt-BR')}/ano)</small>
+            </div>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">
+            Estimativa calculada com base na categoria ${c.marca}, alíquota do estado ${c.estado}, idade de ${2026 - c.ano_modelo} anos e rodagem média de 1.000 km/mês.
+          </p>
+
+          <div class="wm-tco-grid-4">
+            <div class="wm-tco-item-card">
+              <div class="wm-tco-item-header"><i class="fa-solid fa-shield-halved"></i> Seguro Auto Médio</div>
+              <div class="wm-tco-item-monthly">R$ ${t.detalhamento_mensal.seguro.toLocaleString('pt-BR')} <small style="font-size: 0.7rem;">/mês</small></div>
+              <div class="wm-tco-item-annual">R$ ${t.detalhamento_anual.seguro.toLocaleString('pt-BR')} / ano (${t.detalhamento_anual.categoria_seguro})</div>
+            </div>
+
+            <div class="wm-tco-item-card">
+              <div class="wm-tco-item-header"><i class="fa-solid fa-file-invoice-dollar"></i> IPVA Estimado</div>
+              <div class="wm-tco-item-monthly">R$ ${t.detalhamento_mensal.ipva.toLocaleString('pt-BR')} <small style="font-size: 0.7rem;">/mês</small></div>
+              <div class="wm-tco-item-annual">${t.detalhamento_anual.ipva_isento ? 'Isento por idade' : `R$ ${t.detalhamento_anual.ipva.toLocaleString('pt-BR')} / ano`}</div>
+            </div>
+
+            <div class="wm-tco-item-card">
+              <div class="wm-tco-item-header"><i class="fa-solid fa-gears"></i> Manutenção & Pneus</div>
+              <div class="wm-tco-item-monthly">R$ ${t.detalhamento_mensal.manutencao.toLocaleString('pt-BR')} <small style="font-size: 0.7rem;">/mês</small></div>
+              <div class="wm-tco-item-annual">R$ ${t.detalhamento_anual.manutencao.toLocaleString('pt-BR')} / ano (preventiva)</div>
+            </div>
+
+            <div class="wm-tco-item-card">
+              <div class="wm-tco-item-header"><i class="fa-solid fa-gas-pump"></i> Combustível Médio</div>
+              <div class="wm-tco-item-monthly">R$ ${t.detalhamento_mensal.combustivel.toLocaleString('pt-BR')} <small style="font-size: 0.7rem;">/mês</small></div>
+              <div class="wm-tco-item-annual">R$ ${t.detalhamento_anual.combustivel.toLocaleString('pt-BR')} / ano (1.000 km/mês)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEÇÃO 3: CURVA DE DEPRECIAÇÃO & ARBITRAGEM -->
         <div class="wm-analytics-header">
           <div class="wm-analytics-title">
             <i class="fa-solid fa-chart-pie" style="color: var(--wm-red);"></i>
-            Raio-X Analítico de Mercado: ${c.marca} ${c.modelo}
+            Raio-X de Mercado: ${c.marca} ${c.modelo}
           </div>
           <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
             Dados calculados em tempo real sobre a base nacional
@@ -394,12 +554,14 @@ async function openCarModal(id_anuncio) {
     if (a.curva_depreciacao && a.curva_depreciacao.length > 1) {
       renderDepreciationChart(a.curva_depreciacao, c.ano_modelo, c.preco);
     } else {
-      const container = document.getElementById('depreciationCanvas').parentElement;
-      container.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.85rem;">
-          Amostra insuficiente de anos para traçar a curva deste modelo.
-        </div>
-      `;
+      const canvasEl = document.getElementById('depreciationCanvas');
+      if (canvasEl && canvasEl.parentElement) {
+        canvasEl.parentElement.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.85rem;">
+            Amostra insuficiente de anos para traçar a curva deste modelo.
+          </div>
+        `;
+      }
     }
 
   } catch (err) {
@@ -408,7 +570,9 @@ async function openCarModal(id_anuncio) {
 }
 
 function renderDepreciationChart(curva, anoAtual, precoAtual) {
-  const ctx = document.getElementById('depreciationCanvas').getContext('2d');
+  const canvas = document.getElementById('depreciationCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   if (depreciationChart) {
     depreciationChart.destroy();
   }
@@ -466,6 +630,56 @@ function renderDepreciationChart(curva, anoAtual, precoAtual) {
 // 4. EVENT LISTENERS E CONTROLES
 // ==========================================================================
 function initEventListeners() {
+  // Modal de Configuração de Viagem & Origem
+  const openTravelBtn = document.getElementById('openTravelConfigBtn');
+  const travelModal = document.getElementById('travelModal');
+  const closeTravelBtn = document.getElementById('travelModalCloseBtn');
+  const cancelTravelBtn = document.getElementById('cancelTravelConfigBtn');
+  const saveTravelBtn = document.getElementById('saveTravelConfigBtn');
+
+  if (openTravelBtn && travelModal) {
+    openTravelBtn.addEventListener('click', () => {
+      document.getElementById('travelCityInput').value = state.travel.user_city;
+      document.getElementById('travelUfSelect').value = state.travel.user_uf;
+      document.getElementById('travelFuelSelect').value = state.travel.fuel_type;
+      document.getElementById('travelFuelPriceInput').value = state.travel.fuel_price;
+      document.getElementById('travelKmPerLInput').value = state.travel.km_per_liter;
+      document.getElementById('travelTollInput').value = state.travel.toll_per_100km;
+      document.getElementById('travelExtraInput').value = state.travel.extra_costs;
+      travelModal.classList.add('open');
+    });
+
+    closeTravelBtn.addEventListener('click', () => travelModal.classList.remove('open'));
+    cancelTravelBtn.addEventListener('click', () => travelModal.classList.remove('open'));
+    travelModal.addEventListener('click', e => {
+      if (e.target === travelModal) travelModal.classList.remove('open');
+    });
+
+    saveTravelBtn.addEventListener('click', () => {
+      state.travel.user_city = document.getElementById('travelCityInput').value.trim() || 'São Paulo';
+      state.travel.user_uf = document.getElementById('travelUfSelect').value;
+      state.travel.fuel_type = document.getElementById('travelFuelSelect').value;
+      state.travel.fuel_price = parseFloat(document.getElementById('travelFuelPriceInput').value) || 6.10;
+      state.travel.km_per_liter = parseFloat(document.getElementById('travelKmPerLInput').value) || 12.0;
+      state.travel.toll_per_100km = parseFloat(document.getElementById('travelTollInput').value) || 16.0;
+      state.travel.extra_costs = parseFloat(document.getElementById('travelExtraInput').value) || 150.0;
+
+      // Persistir no localStorage
+      localStorage.setItem('wm_user_city', state.travel.user_city);
+      localStorage.setItem('wm_user_uf', state.travel.user_uf);
+      localStorage.setItem('wm_fuel_type', state.travel.fuel_type);
+      localStorage.setItem('wm_fuel_price', state.travel.fuel_price);
+      localStorage.setItem('wm_km_per_l', state.travel.km_per_liter);
+      localStorage.setItem('wm_toll', state.travel.toll_per_100km);
+      localStorage.setItem('wm_extra', state.travel.extra_costs);
+
+      updateNavTravelSummary();
+      travelModal.classList.remove('open');
+      state.page = 1;
+      fetchCars();
+    });
+  }
+
   // Input de Busca com Debounce
   const searchInput = document.getElementById('searchInput');
   searchInput.addEventListener('input', e => {
@@ -522,7 +736,6 @@ function initEventListeners() {
       document.querySelectorAll('#ufPillGrid .wm-pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.uf = btn.getAttribute('data-uf');
-      document.getElementById('currentLocationText').innerText = state.uf ? `Estado: ${state.uf}` : 'Brasil (Todas UFs)';
       state.page = 1;
       fetchCars();
     });
@@ -657,7 +870,6 @@ function resetFilters() {
   document.getElementById('kmRange').value = 200000;
   document.getElementById('kmDisplay').innerText = 'Até 200.000 km';
   document.getElementById('sortSelect').value = 'deal_desc';
-  document.getElementById('currentLocationText').innerText = 'Brasil (Todas UFs)';
 
   document.querySelectorAll('#ufPillGrid .wm-pill-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('#ufPillGrid .wm-pill-btn[data-uf=""]').classList.add('active');

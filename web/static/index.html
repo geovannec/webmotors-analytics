@@ -53,9 +53,9 @@
       </nav>
 
       <div class="wm-nav-actions">
-        <div class="wm-location-pill" id="locationSelector">
-          <i class="fa-solid fa-location-dot"></i>
-          <span id="currentLocationText">Brasil (Todas UFs)</span>
+        <div class="wm-travel-pill" id="openTravelConfigBtn" title="Configurar Minha Localização e Custos de Viagem">
+          <i class="fa-solid fa-car-side"></i>
+          <span id="navTravelSummary">📍 Origem: São Paulo (SP) • Gasolina (12 km/l)</span>
         </div>
         <button class="wm-btn-sell">
           <i class="fa-solid fa-plus"></i> Vender meu Carro
@@ -252,6 +252,84 @@
 
       <div id="modalBody" class="wm-modal-grid">
         <!-- Carregado dinamicamente via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. MODAL DE CONFIGURAÇÃO DE ORIGEM & VIAGEM DE BUSCA -->
+  <div id="travelModal" class="wm-modal-backdrop">
+    <div class="wm-modal-content wm-travel-modal-dialog">
+      <button id="travelModalCloseBtn" class="wm-modal-close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div style="padding: 24px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-route" style="color: var(--wm-red);"></i> Configurar Origem & Custos de Viagem
+        </h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+          Informe onde você está e os parâmetros do seu veículo para calcularmos o custo exato de ida e volta e dizer se <strong>vale a pena viajar para buscar cada carro</strong>.
+        </p>
+
+        <div class="wm-form-grid-2">
+          <div class="wm-form-group">
+            <label class="wm-form-label">Sua Cidade de Origem</label>
+            <input type="text" id="travelCityInput" list="citiesList" class="wm-form-input" placeholder="Ex: São Paulo, Curitiba, Campinas..." value="São Paulo">
+            <datalist id="citiesList"></datalist>
+          </div>
+          <div class="wm-form-group">
+            <label class="wm-form-label">Seu Estado (UF)</label>
+            <select id="travelUfSelect" class="wm-form-input">
+              <option value="SP">São Paulo (SP)</option>
+              <option value="PR">Paraná (PR)</option>
+              <option value="RJ">Rio de Janeiro (RJ)</option>
+              <option value="MG">Minas Gerais (MG)</option>
+              <option value="SC">Santa Catarina (SC)</option>
+              <option value="RS">Rio Grande do Sul (RS)</option>
+              <option value="BA">Bahia (BA)</option>
+              <option value="GO">Goiás (GO)</option>
+              <option value="DF">Distrito Federal (DF)</option>
+              <option value="ES">Espírito Santo (ES)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="wm-form-grid-2">
+          <div class="wm-form-group">
+            <label class="wm-form-label">Tipo de Combustível</label>
+            <select id="travelFuelSelect" class="wm-form-input">
+              <option value="GASOLINA">Gasolina</option>
+              <option value="ETANOL">Etanol (Álcool)</option>
+              <option value="DIESEL">Diesel</option>
+            </select>
+          </div>
+          <div class="wm-form-group">
+            <label class="wm-form-label">Preço do Litro (R$)</label>
+            <input type="number" step="0.05" id="travelFuelPriceInput" class="wm-form-input" value="6.10">
+          </div>
+        </div>
+
+        <div class="wm-form-grid-2">
+          <div class="wm-form-group">
+            <label class="wm-form-label">Autonomia na Estrada (km/l)</label>
+            <input type="number" step="0.5" id="travelKmPerLInput" class="wm-form-input" value="12.0">
+          </div>
+          <div class="wm-form-group">
+            <label class="wm-form-label">Pedágio Médio por 100km (R$)</label>
+            <input type="number" step="1.0" id="travelTollInput" class="wm-form-input" value="16.0">
+          </div>
+        </div>
+
+        <div class="wm-form-group" style="margin-top: 14px;">
+          <label class="wm-form-label">Despesas Extras / Alimentação / Hotel (R$)</label>
+          <input type="number" step="10" id="travelExtraInput" class="wm-form-input" value="150.0">
+        </div>
+
+        <div style="margin-top: 22px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button id="cancelTravelConfigBtn" class="wm-btn-details">Cancelar</button>
+          <button id="saveTravelConfigBtn" class="wm-btn-sell">
+            <i class="fa-solid fa-check"></i> Salvar e Recalcular Todos os Carros
+          </button>
+        </div>
       </div>
     </div>
   </div>

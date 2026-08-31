@@ -1004,6 +1004,217 @@ body {
 }
 
 /* ==========================================================================
+   7. ESTILOS DE LOGÍSTICA DE VIAGEM & TCO (CUSTO DE POSSE)
+   ========================================================================== */
+
+/* Navbar Travel & Origin Pill */
+.wm-travel-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--deal-emerald-bg);
+  border: 1px solid var(--deal-emerald-border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--deal-emerald-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-travel-pill:hover {
+  background: #D1FAE5;
+  transform: translateY(-1px);
+}
+
+/* Card Travel & Verdict Widget */
+.wm-card-trip-widget {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-size: 0.74rem;
+}
+
+.wm-trip-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.wm-trip-cost-tag {
+  color: #0F172A;
+  font-weight: 700;
+}
+
+.wm-trip-verdict-banner {
+  margin-top: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wm-trip-verdict-banner.emerald {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.wm-trip-verdict-banner.blue {
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
+}
+
+.wm-trip-verdict-banner.amber {
+  background: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+/* Card TCO Widget */
+.wm-card-tco-widget {
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 4px 0 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.wm-card-tco-title {
+  color: #92400E;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wm-card-tco-val {
+  font-weight: 800;
+  color: #78350F;
+}
+
+/* Modal Travel & TCO Panels */
+.wm-travel-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.wm-breakdown-box {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.wm-breakdown-lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.wm-breakdown-val {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1E293B;
+}
+
+.wm-tco-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.wm-tco-item-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.wm-tco-item-header {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.wm-tco-item-monthly {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.wm-tco-item-annual {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Modal de Configuração de Viagem */
+.wm-travel-modal-dialog {
+  max-width: 580px;
+}
+
+.wm-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.wm-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wm-form-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.wm-form-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+}
+
+.wm-form-input:focus {
+  border-color: var(--wm-red);
+}
+
+/* ==========================================================================
    6. RESPONSIVIDADE (MOBILE & TABLET)
    ========================================================================== */
 @media (max-width: 960px) {
@@ -1018,6 +1229,9 @@ body {
   }
   .wm-analytics-grid-2 {
     grid-template-columns: 1fr;
+  }
+  .wm-travel-breakdown-grid, .wm-tco-grid-4 {
+    grid-template-columns: 1fr 1fr;
   }
   .wm-nav-links {
     display: none;
