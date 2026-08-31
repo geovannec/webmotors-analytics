@@ -2,10 +2,12 @@ import duckdb
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import pandas as pd
+import logging
 from datetime import datetime
 
-from config.settings import DB_PATH
+from config.settings import DB_PATH, BASE_DIR
 
+logger = logging.getLogger("DatabaseManager")
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 
 
