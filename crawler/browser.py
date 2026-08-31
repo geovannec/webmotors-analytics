@@ -1,3 +1,4 @@
+import os
 import asyncio
 import random
 from typing import Optional
@@ -24,10 +25,17 @@ class BrowserFactory:
             "--no-default-browser-check",
         ]
 
+        proxy_env = os.environ.get("ALL_PROXY") or os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
+        proxy_dict = None
+        if proxy_env:
+            proxy_clean = proxy_env.replace("socks5h://", "socks5://")
+            proxy_dict = {"server": proxy_clean}
+
         context: BrowserContext = await playwright_instance.chromium.launch_persistent_context(
             user_data_dir=user_data_dir,
             headless=headless,
             args=args,
+            proxy=proxy_dict,
             user_agent=USER_AGENT,
             viewport=VIEWPORT,
             locale="pt-BR",

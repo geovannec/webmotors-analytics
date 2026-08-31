@@ -72,8 +72,8 @@ class WebmotorsScraper:
             self._pw_page = await self._pw_context.new_page()
             # Navegar para página inicial do Webmotors para carregar contexto e tokens
             try:
-                await self._pw_page.goto("https://www.webmotors.com.br/carros/sp", wait_until="domcontentloaded", timeout=40000)
-                await asyncio.sleep(3)
+                await self._pw_page.goto("https://www.webmotors.com.br/carros/sp", wait_until="commit", timeout=30000)
+                await asyncio.sleep(4)
             except Exception as e:
                 logger.warning(f"Aviso ao inicializar página base no navegador: {e}")
 
