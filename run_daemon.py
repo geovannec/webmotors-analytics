@@ -75,9 +75,9 @@ def stop_daemon():
 def main():
     parser = argparse.ArgumentParser(description="WebMotors Analytics - Daemon de Atualização Horária")
     parser.add_argument("--interval", type=int, default=DAEMON_INTERVAL_SECONDS, help="Intervalo entre coletas em segundos (padrão: 3600 = 1 hora)")
-    parser.add_argument("--tier", type=str, choices=["1", "2", "3", "all"], default="1", help="Tier de estados para cada ciclo (padrão: 1 = SP, RJ, MG, PR, SC, RS)")
-    parser.add_argument("--brands-cat", type=str, choices=["volume", "luxury", "ev", "all", "none"], default="volume", help="Categoria de marcas (padrão: volume)")
-    parser.add_argument("--pages-per-shard", type=int, default=2, help="Páginas por shard em cada ciclo (padrão: 2)")
+    parser.add_argument("--tier", type=str, choices=["1", "2", "3", "all"], default="all", help="Tier de estados para cada ciclo (padrão: all = todos os 27 estados do Brasil)")
+    parser.add_argument("--brands-cat", type=str, choices=["volume", "luxury", "ev", "all", "none"], default="all", help="Categoria de marcas (padrão: all = todas as marcas)")
+    parser.add_argument("--pages-per-shard", type=int, default=0, help="Páginas por shard em cada ciclo (0 = exaustivo, puxa todos os anúncios até esgotar)")
     parser.add_argument("--run-once", action="store_true", help="Executar apenas 1 ciclo imediato e encerrar")
     parser.add_argument("--status", action="store_true", help="Exibir status do daemon em execução")
     parser.add_argument("--stop", action="store_true", help="Solicitar parada do daemon em execução")

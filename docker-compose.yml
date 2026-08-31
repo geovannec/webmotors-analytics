@@ -34,7 +34,7 @@ services:
       dockerfile: Dockerfile
     container_name: webmotors_crawler
     restart: always
-    command: python run_daemon.py --interval 3600 --tier 1 --brands-cat volume --pages-per-shard 2
+    command: python run_daemon.py --interval 3600 --tier all --brands-cat all --pages-per-shard 0
     volumes:
       - webmotors_data:/app/data
 

@@ -22,10 +22,26 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("WebmotorsScraper")
 
 
+USER_AGENTS_POOL = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+]
+
+IMPERSONATE_PROFILES = ["chrome124", "chrome120", "edge101", "safari17_0", "chrome110"]
+
+import time
+
+
 class WebmotorsScraper:
     def __init__(self, db_manager: Optional[DatabaseManager] = None):
         self.db = db_manager or DatabaseManager()
         self.intercepted_items: List[Dict[str, Any]] = []
+        self._init_session()
+
+    def _init_session(self):
         if HAS_CURL_CFFI:
             self.http_session = cffi_requests.Session()
         else:
@@ -40,7 +56,7 @@ class WebmotorsScraper:
     ) -> List[Dict[str, Any]]:
         """
         Extrai anúncios diretamente do endpoint JSON da Webmotors.
-        Utiliza TLS fingerprint impersonation do Chrome via curl_cffi quando disponível.
+        Utiliza rotação de impressões digitais TLS, User-Agents reais e retry com backoff exponencial.
         """
         base_search_url = f"https://www.webmotors.com.br/carros/{uf.lower()}"
         if marca:
@@ -57,31 +73,46 @@ class WebmotorsScraper:
             "Accept": "application/json, text/plain, */*",
             "Referer": inner_url,
             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"macOS"',
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
         }
 
-        try:
-            if HAS_CURL_CFFI:
-                resp = self.http_session.get(api_url, headers=headers, impersonate="chrome124", timeout=15)
-            else:
-                headers["User-Agent"] = USER_AGENT
-                resp = self.http_session.get(api_url, headers=headers, timeout=15)
+        for attempt in range(1, 4):
+            try:
+                ua = random.choice(USER_AGENTS_POOL)
+                profile = random.choice(IMPERSONATE_PROFILES)
+                headers["User-Agent"] = ua
 
-            if resp.status_code == 200:
-                data = resp.json()
-                items = data.get("SearchResults", []) or []
-                collected = []
-                for item in items:
-                    parsed = WebmotorsParser.parse_json_item(item)
-                    if parsed and parsed.get("id_anuncio"):
-                        collected.append(parsed)
-                logger.info(f"[API] Página {pagina} ({uf.upper()}{' - ' + marca.upper() if marca else ''}): {len(collected)} veículos coletados.")
-                return collected
-            else:
-                logger.warning(f"[API] HTTP {resp.status_code} na página {pagina}: {resp.text[:120]}")
-                return []
-        except Exception as e:
-            logger.error(f"[API] Erro de requisição na página {pagina}: {e}")
-            return []
+                if HAS_CURL_CFFI:
+                    resp = self.http_session.get(api_url, headers=headers, impersonate=profile, timeout=15)
+                else:
+                    resp = self.http_session.get(api_url, headers=headers, timeout=15)
+
+                if resp.status_code == 200:
+                    data = resp.json()
+                    items = data.get("SearchResults", []) or []
+                    collected = []
+                    for item in items:
+                        parsed = WebmotorsParser.parse_json_item(item)
+                        if parsed and parsed.get("id_anuncio"):
+                            collected.append(parsed)
+                    logger.info(f"[API] Página {pagina} ({uf.upper()}{' - ' + marca.upper() if marca else ''}): {len(collected)} veículos coletados.")
+                    return collected
+                elif resp.status_code in (403, 429):
+                    logger.warning(f"[API] HTTP {resp.status_code} na página {pagina} (tentativa {attempt}/3). Renovando sessão e aguardando jitter...")
+                    self._init_session()
+                    time.sleep(2.0 * attempt + random.uniform(1.0, 2.5))
+                else:
+                    logger.warning(f"[API] HTTP {resp.status_code} na página {pagina}: {resp.text[:120]}")
+                    break
+            except Exception as e:
+                logger.error(f"[API] Erro de requisição na página {pagina} (tentativa {attempt}): {e}")
+                time.sleep(1.5 * attempt)
+
+        return []
 
     async def _handle_response(self, response: Response):
         """Intercepta requisições de rede para extrair respostas JSON da API de busca (Modo Playwright)"""

@@ -44,9 +44,9 @@ class CrawlerDaemon:
     def __init__(
         self,
         interval_seconds: int = DAEMON_INTERVAL_SECONDS,
-        tier: str = "1",
+        tier: str = "all",
         brands_cat: str = "all",
-        pages_per_shard: int = 3,
+        pages_per_shard: int = 0,
         db_manager: Optional[DatabaseManager] = None,
     ):
         self.interval = interval_seconds

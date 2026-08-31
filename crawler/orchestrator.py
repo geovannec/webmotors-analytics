@@ -161,10 +161,12 @@ class NationalCrawlerOrchestrator:
             if resume and shard_key in completed_set:
                 continue
 
-            logger.info(f"\n[{idx}/{total_shards}] Coletando Shard: {shard_key} ({pages_per_shard} páginas)")
+            max_pages = 250 if pages_per_shard <= 0 else pages_per_shard
+            mode_str = "Exaustivo (todos os anúncios disponíveis)" if pages_per_shard <= 0 else f"{pages_per_shard} páginas"
+            logger.info(f"\n[{idx}/{total_shards}] Coletando Shard: {shard_key} ({mode_str})")
 
             shard_coletados = 0
-            for pag in range(1, pages_per_shard + 1):
+            for pag in range(1, max_pages + 1):
                 if self.stop_requested:
                     break
 
