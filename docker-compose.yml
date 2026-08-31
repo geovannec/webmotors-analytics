@@ -1,6 +1,20 @@
 version: "3.8"
 
 services:
+  warp:
+    image: caomingjun/warp:latest
+    container_name: webmotors_warp
+    restart: always
+    environment:
+      - WARP_SLEEP=2
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+      - net.ipv4.conf.all.src_valid_mark=1
+    volumes:
+      - warp_data:/var/lib/cloudflare-warp
+
   web:
     image: webmotors-web:latest
     build:
@@ -34,9 +48,16 @@ services:
       dockerfile: Dockerfile
     container_name: webmotors_crawler
     restart: always
+    depends_on:
+      - warp
+    environment:
+      - ALL_PROXY=socks5h://warp:1080
+      - HTTP_PROXY=socks5h://warp:1080
+      - HTTPS_PROXY=socks5h://warp:1080
     command: python run_daemon.py --interval 3600 --tier all --brands-cat all --pages-per-shard 0
     volumes:
       - webmotors_data:/app/data
 
 volumes:
   webmotors_data:
+  warp_data:

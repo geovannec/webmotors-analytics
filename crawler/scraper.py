@@ -42,10 +42,17 @@ class WebmotorsScraper:
         self._init_session()
 
     def _init_session(self):
+        proxy = os.environ.get("ALL_PROXY") or os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
+        self.proxies = {"http": proxy, "https": proxy} if proxy else None
+        if self.proxies:
+            logger.info(f"🛡️ Roteamento ativo via proxy: {proxy}")
+
         if HAS_CURL_CFFI:
-            self.http_session = cffi_requests.Session()
+            self.http_session = cffi_requests.Session(proxies=self.proxies)
         else:
             self.http_session = requests.Session()
+            if self.proxies:
+                self.http_session.proxies.update(self.proxies)
 
     def scrape_api_page(
         self,
@@ -86,10 +93,14 @@ class WebmotorsScraper:
                 profile = random.choice(IMPERSONATE_PROFILES)
                 headers["User-Agent"] = ua
 
+                kw = {"headers": headers, "timeout": 20}
+                if self.proxies:
+                    kw["proxies"] = self.proxies
+
                 if HAS_CURL_CFFI:
-                    resp = self.http_session.get(api_url, headers=headers, impersonate=profile, timeout=15)
+                    resp = self.http_session.get(api_url, impersonate=profile, **kw)
                 else:
-                    resp = self.http_session.get(api_url, headers=headers, timeout=15)
+                    resp = self.http_session.get(api_url, **kw)
 
                 if resp.status_code == 200:
                     data = resp.json()
