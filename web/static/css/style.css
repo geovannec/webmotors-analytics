@@ -318,6 +318,185 @@ body {
 }
 
 /* ==========================================================================
+   CARROSSEL E SELETOR DE MARCAS COM LOGOS WEBMOTORS
+   ========================================================================== */
+.wm-brands-hero-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.wm-brands-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.wm-brands-hero-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wm-brands-scroll-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+.wm-brands-scroll-grid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.wm-brands-scroll-grid::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+.wm-brand-card-item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-strong);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  user-select: none;
+}
+
+.wm-brand-card-item:hover {
+  border-color: var(--wm-red);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.wm-brand-card-item.active {
+  border-color: var(--wm-red);
+  background: var(--wm-red-light);
+  color: var(--wm-red);
+  box-shadow: 0 0 0 2px rgba(225, 17, 56, 0.2);
+}
+
+.wm-brand-logo-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.wm-brand-name-text {
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.wm-brand-count-badge {
+  background: var(--bg-main);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.wm-brand-card-item.active .wm-brand-count-badge {
+  background: var(--wm-red);
+  color: #FFFFFF;
+}
+
+/* Faixa de Modelos Ativa */
+.wm-models-active-bar {
+  display: none;
+  margin-top: 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.wm-models-active-bar.visible {
+  display: flex;
+}
+
+.wm-models-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.wm-model-chip {
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-model-chip:hover, .wm-model-chip.active {
+  background: var(--wm-red);
+  color: #FFFFFF;
+  border-color: var(--wm-red);
+}
+
+/* Mini Grid de Marcas na Sidebar */
+.wm-sidebar-brand-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.wm-sidebar-brand-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wm-sidebar-brand-btn:hover, .wm-sidebar-brand-btn.active {
+  border-color: var(--wm-red);
+  background: var(--wm-red-light);
+  color: var(--wm-red);
+}
+
+.wm-sidebar-brand-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* ==========================================================================
    3. LAYOUT PRINCIPAL (SIDEBAR + GRID)
    ========================================================================== */
 .wm-main-layout {
@@ -336,9 +515,30 @@ body {
   border: 1px solid var(--border-subtle);
   padding: 20px;
   box-shadow: var(--shadow-sm);
-  height: fit-content;
   position: sticky;
-  top: 96px;
+  top: 88px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+.wm-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.wm-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wm-sidebar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+.wm-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
 
 .wm-filter-header {

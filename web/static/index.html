@@ -93,6 +93,23 @@
         <button class="wm-tag-pill" data-search="Híbrido">Híbridos & Elétricos</button>
         <button class="wm-tag-pill" data-km="30000">Menos de 30.000 km</button>
       </div>
+
+      <!-- Carrossel de Principais Marcas com Logos Oficiais -->
+      <div class="wm-brands-hero-section">
+        <div class="wm-brands-hero-header">
+          <span class="wm-brands-hero-title"><i class="fa-solid fa-car"></i> Principais Marcas no Mercado</span>
+          <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600;">Clique na marca para ver os modelos disponíveis</small>
+        </div>
+        <div class="wm-brands-scroll-grid" id="heroBrandsGrid">
+          <!-- Injetado dinamicamente via app.js com logos oficiais -->
+        </div>
+        <!-- Faixa Dinâmica de Modelos da Marca Selecionada -->
+        <div class="wm-models-active-bar" id="heroModelsBar">
+          <span class="wm-models-title" id="heroModelsTitle">Modelos disponíveis:</span>
+          <div id="heroModelsChips" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -142,9 +159,12 @@
         </div>
       </div>
 
-      <!-- Filtro de Marca -->
+      <!-- Filtro de Marca com Logos Rápidos -->
       <div class="wm-filter-section">
         <label class="wm-filter-label">Marca</label>
+        <div class="wm-sidebar-brand-grid" id="sidebarBrandGrid">
+          <!-- Top 8 marcas rápidas com logos injetadas via app.js -->
+        </div>
         <select id="brandSelect" class="wm-select">
           <option value="">Todas as Marcas</option>
         </select>
@@ -156,6 +176,7 @@
         <select id="modelSelect" class="wm-select" disabled>
           <option value="">Selecione uma marca primeiro</option>
         </select>
+        <div id="sidebarModelsChips" style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px;"></div>
       </div>
 
       <!-- Preço Máximo -->

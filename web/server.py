@@ -135,6 +135,25 @@ def get_cities():
     return {"cities": cities}
 
 
+@app.get("/api/filters/models")
+def get_models(marca: str):
+    """Retorna a lista de modelos e respectivas contagens para uma marca selecionada."""
+    if not marca:
+        return {"models": []}
+    with db.get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT modelo, count(*) as total
+            FROM anuncios
+            WHERE status = 'ATIVO' AND upper(marca) = upper(?)
+            GROUP BY modelo
+            ORDER BY total DESC, modelo ASC
+            """,
+            [marca.strip()],
+        ).fetchall()
+    return {"marca": marca.upper(), "models": [{"modelo": r[0], "total": r[1]} for r in rows]}
+
+
 @app.get("/api/cars")
 def get_cars(
     q: Optional[str] = None,

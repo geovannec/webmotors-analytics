@@ -61,20 +61,45 @@ async function loadSummary() {
   }
 }
 
+const BRAND_LOGOS = {
+  'CHEVROLET': 'https://cdn.simpleicons.org/chevrolet/1F242D',
+  'VOLKSWAGEN': 'https://cdn.simpleicons.org/volkswagen/1F242D',
+  'FIAT': 'https://cdn.simpleicons.org/fiat/E11138',
+  'TOYOTA': 'https://cdn.simpleicons.org/toyota/E11138',
+  'HYUNDAI': 'https://cdn.simpleicons.org/hyundai/1F242D',
+  'HONDA': 'https://cdn.simpleicons.org/honda/E11138',
+  'JEEP': 'https://cdn.simpleicons.org/jeep/1F242D',
+  'RENAULT': 'https://cdn.simpleicons.org/renault/1F242D',
+  'NISSAN': 'https://cdn.simpleicons.org/nissan/E11138',
+  'FORD': 'https://cdn.simpleicons.org/ford/1F242D',
+  'MITSUBISHI': 'https://cdn.simpleicons.org/mitsubishielectric/E11138',
+  'SUZUKI': 'https://cdn.simpleicons.org/suzuki/E11138',
+  'BMW': 'https://cdn.simpleicons.org/bmw/1F242D',
+  'AUDI': 'https://cdn.simpleicons.org/audi/1F242D',
+  'VOLVO': 'https://cdn.simpleicons.org/volvocars/1F242D',
+  'PORSCHE': 'https://cdn.simpleicons.org/porsche/1F242D',
+  'SUBARU': 'https://cdn.simpleicons.org/subaru/1F242D',
+  'KIA': 'https://cdn.simpleicons.org/kia/1F242D',
+  'PEUGEOT': 'https://cdn.simpleicons.org/peugeot/1F242D',
+  'CITROEN': 'https://cdn.simpleicons.org/citroen/E11138',
+  'CITROËN': 'https://cdn.simpleicons.org/citroen/E11138',
+  'RAM': 'https://cdn.simpleicons.org/ram/1F242D'
+};
+
+function getBrandLogoUrl(marca) {
+  const m = (marca || '').toUpperCase().trim();
+  if (BRAND_LOGOS[m]) return BRAND_LOGOS[m];
+  const slug = m.toLowerCase().replace(/[^a-z]/g, '');
+  return `https://cdn.simpleicons.org/${slug}/1F242D`;
+}
+
 async function loadFacets() {
   try {
     const res = await fetch('/api/filters/facets');
     const data = await res.json();
 
-    // Popular Marcas
-    const brandSelect = document.getElementById('brandSelect');
-    brandSelect.innerHTML = '<option value="">Todas as Marcas</option>';
-    data.marcas.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.marca;
-      opt.innerText = `${m.marca} (${m.total})`;
-      brandSelect.appendChild(opt);
-    });
+    // Renderizar Seletor Visual de Marcas (Hero + Sidebar + Select)
+    renderBrandSelectors(data.marcas || []);
 
     // Popular Anos
     const yearMin = document.getElementById('yearMinSelect');
@@ -96,6 +121,169 @@ async function loadFacets() {
   } catch (err) {
     console.error('Erro ao carregar facets:', err);
   }
+}
+
+function renderBrandSelectors(marcas) {
+  // 1. Carrossel Hero com Logos
+  const heroGrid = document.getElementById('heroBrandsGrid');
+  if (heroGrid) {
+    heroGrid.innerHTML = marcas.slice(0, 20).map(m => {
+      const logo = getBrandLogoUrl(m.marca);
+      const isActive = state.marca.toUpperCase() === m.marca.toUpperCase();
+      return `
+        <div class="wm-brand-card-item ${isActive ? 'active' : ''}" data-brand="${m.marca}" onclick="selectBrand('${m.marca}')">
+          <img src="${logo}" alt="${m.marca}" class="wm-brand-logo-icon" onerror="this.src='https://cdn.simpleicons.org/car/1F242D'">
+          <span class="wm-brand-name-text">${m.marca}</span>
+          <span class="wm-brand-count-badge">${m.total}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 2. Mini Grid na Sidebar com as 8 Principais
+  const sidebarGrid = document.getElementById('sidebarBrandGrid');
+  if (sidebarGrid) {
+    const topSidebar = marcas.slice(0, 8);
+    sidebarGrid.innerHTML = topSidebar.map(m => {
+      const logo = getBrandLogoUrl(m.marca);
+      const isActive = state.marca.toUpperCase() === m.marca.toUpperCase();
+      return `
+        <div class="wm-sidebar-brand-btn ${isActive ? 'active' : ''}" onclick="selectBrand('${m.marca}')" title="${m.marca}">
+          <img src="${logo}" alt="${m.marca}" class="wm-sidebar-brand-icon" onerror="this.src='https://cdn.simpleicons.org/car/1F242D'">
+          <span>${m.marca}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 3. Dropdown Completo com Todas as Marcas
+  const brandSelect = document.getElementById('brandSelect');
+  if (brandSelect) {
+    brandSelect.innerHTML = '<option value="">Todas as Marcas</option>';
+    marcas.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.marca;
+      opt.innerText = `${m.marca} (${m.total})`;
+      if (state.marca.toUpperCase() === m.marca.toUpperCase()) opt.selected = true;
+      brandSelect.appendChild(opt);
+    });
+  }
+}
+
+async function selectBrand(marca) {
+  // Se clicar na mesma marca ativa, desseleciona
+  if (state.marca && state.marca.toUpperCase() === marca.toUpperCase()) {
+    state.marca = '';
+    state.modelo = '';
+  } else {
+    state.marca = marca;
+    state.modelo = '';
+  }
+  state.page = 1;
+
+  // Atualizar visual dos botões
+  document.querySelectorAll('.wm-brand-card-item').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-brand') === state.marca);
+  });
+  document.querySelectorAll('.wm-sidebar-brand-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('title') === state.marca);
+  });
+
+  const brandSelect = document.getElementById('brandSelect');
+  if (brandSelect) brandSelect.value = state.marca;
+
+  // Carregar e exibir modelos da marca
+  await updateModelsForBrand(state.marca);
+
+  fetchCars();
+}
+
+async function updateModelsForBrand(marca) {
+  const heroModelsBar = document.getElementById('heroModelsBar');
+  const heroChips = document.getElementById('heroModelsChips');
+  const sidebarChips = document.getElementById('sidebarModelsChips');
+  const modelSelect = document.getElementById('modelSelect');
+
+  if (!marca) {
+    if (heroModelsBar) heroModelsBar.classList.remove('visible');
+    if (heroChips) heroChips.innerHTML = '';
+    if (sidebarChips) sidebarChips.innerHTML = '';
+    if (modelSelect) {
+      modelSelect.innerHTML = '<option value="">Selecione uma marca primeiro</option>';
+      modelSelect.disabled = true;
+    }
+    return;
+  }
+
+  if (modelSelect) {
+    modelSelect.disabled = false;
+    modelSelect.innerHTML = '<option value="">Todos os Modelos</option>';
+  }
+
+  try {
+    const res = await fetch(`/api/filters/models?marca=${encodeURIComponent(marca)}`);
+    const data = await res.json();
+    const models = data.models || [];
+
+    if (models.length > 0) {
+      if (heroModelsBar) heroModelsBar.classList.add('visible');
+      const titleEl = document.getElementById('heroModelsTitle');
+      if (titleEl) titleEl.innerText = `Modelos ${marca}:`;
+
+      // Chips no Hero
+      if (heroChips) {
+        heroChips.innerHTML = models.map(m => `
+          <button class="wm-model-chip ${state.modelo === m.modelo ? 'active' : ''}" onclick="selectModel('${m.modelo}')">
+            ${m.modelo} <span style="opacity: 0.75; font-size: 0.72rem;">(${m.total})</span>
+          </button>
+        `).join('');
+      }
+
+      // Chips na Sidebar
+      if (sidebarChips) {
+        sidebarChips.innerHTML = models.slice(0, 8).map(m => `
+          <button class="wm-model-chip ${state.modelo === m.modelo ? 'active' : ''}" onclick="selectModel('${m.modelo}')">
+            ${m.modelo}
+          </button>
+        `).join('');
+      }
+
+      // Dropdown de Modelo
+      if (modelSelect) {
+        models.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.modelo;
+          opt.innerText = `${m.modelo} (${m.total})`;
+          if (state.modelo === m.modelo) opt.selected = true;
+          modelSelect.appendChild(opt);
+        });
+      }
+    } else {
+      if (heroModelsBar) heroModelsBar.classList.remove('visible');
+    }
+  } catch (err) {
+    console.error('Erro ao buscar modelos:', err);
+  }
+}
+
+function selectModel(modelo) {
+  if (state.modelo === modelo) {
+    state.modelo = '';
+  } else {
+    state.modelo = modelo;
+  }
+  state.page = 1;
+
+  // Atualizar chips ativos
+  document.querySelectorAll('.wm-model-chip').forEach(c => {
+    const text = c.innerText.split('(')[0].trim();
+    c.classList.toggle('active', text === state.modelo);
+  });
+
+  const modelSelect = document.getElementById('modelSelect');
+  if (modelSelect) modelSelect.value = state.modelo;
+
+  fetchCars();
 }
 
 async function loadCities() {
@@ -742,38 +930,13 @@ function initEventListeners() {
   });
 
   // Filtro de Marca
-  document.getElementById('brandSelect').addEventListener('change', async e => {
-    state.marca = e.target.value;
-    state.modelo = '';
-    state.page = 1;
-
-    const modelSelect = document.getElementById('modelSelect');
-    if (!state.marca) {
-      modelSelect.innerHTML = '<option value="">Selecione uma marca primeiro</option>';
-      modelSelect.disabled = true;
-    } else {
-      modelSelect.disabled = false;
-      modelSelect.innerHTML = '<option value="">Todos os Modelos</option>';
-      // Buscar modelos desta marca
-      try {
-        const res = await fetch(`/api/cars?marca=${encodeURIComponent(state.marca)}&limit=100`);
-        const data = await res.json();
-        const modelosUnicos = [...new Set(data.items.map(c => c.modelo))].sort();
-        modelosUnicos.forEach(mod => {
-          modelSelect.innerHTML += `<option value="${mod}">${mod}</option>`;
-        });
-      } catch (err) {
-        console.error('Erro ao buscar modelos:', err);
-      }
-    }
-    fetchCars();
+  document.getElementById('brandSelect').addEventListener('change', e => {
+    selectBrand(e.target.value);
   });
 
   // Filtro de Modelo
   document.getElementById('modelSelect').addEventListener('change', e => {
-    state.modelo = e.target.value;
-    state.page = 1;
-    fetchCars();
+    selectModel(e.target.value);
   });
 
   // Range de Preço
@@ -876,6 +1039,15 @@ function resetFilters() {
 
   document.querySelectorAll('.wm-deal-option').forEach(o => o.classList.remove('active'));
   document.querySelector('.wm-deal-option[data-deal=""]').classList.add('active');
+
+  document.querySelectorAll('.wm-brand-card-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.wm-sidebar-brand-btn').forEach(b => b.classList.remove('active'));
+  const heroModelsBar = document.getElementById('heroModelsBar');
+  if (heroModelsBar) heroModelsBar.classList.remove('visible');
+  const heroChips = document.getElementById('heroModelsChips');
+  if (heroChips) heroChips.innerHTML = '';
+  const sidebarChips = document.getElementById('sidebarModelsChips');
+  if (sidebarChips) sidebarChips.innerHTML = '';
 
   document.querySelectorAll('.seller-checkbox').forEach(c => c.checked = false);
 
