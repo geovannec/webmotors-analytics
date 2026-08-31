@@ -1,0 +1,1025 @@
+/* ==========================================================================
+   WEBMOTORS RECONSTRUCTED + EMBEDDED ANALYTICS - DESIGN SYSTEM
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Cores Oficiais WebMotors */
+  --wm-red: #E11138;
+  --wm-red-hover: #C00A2C;
+  --wm-red-light: #FFF1F3;
+  --wm-red-border: #FECDDC;
+  
+  /* Cores Neutras & Superfície */
+  --bg-main: #F4F5F8;
+  --bg-surface: #FFFFFF;
+  --border-subtle: #E5E7EB;
+  --border-strong: #D1D5DB;
+  
+  /* Tipografia */
+  --text-main: #1F242D;
+  --text-muted: #6B7280;
+  --text-light: #9CA3AF;
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Paleta Analítica (Deal Ratings) */
+  --deal-emerald-bg: #ECFDF5;
+  --deal-emerald-text: #065F46;
+  --deal-emerald-border: #A7F3D0;
+  --deal-emerald-badge: #059669;
+  
+  --deal-blue-bg: #EFF6FF;
+  --deal-blue-text: #1E40AF;
+  --deal-blue-border: #BFDBFE;
+  --deal-blue-badge: #2563EB;
+  
+  --deal-amber-bg: #FFFBEB;
+  --deal-amber-text: #92400E;
+  --deal-amber-border: #FDE68A;
+  --deal-amber-badge: #D97706;
+
+  /* Efeitos */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --transition-fast: 0.18s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   1. NAVBAR & HEADER WEBMOTORS
+   ========================================================================== */
+.wm-navbar {
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.wm-nav-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.wm-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.wm-logo-badge {
+  background: var(--wm-red);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 1.25rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: -0.5px;
+}
+
+.wm-logo-text {
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.wm-logo-analytics {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wm-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  list-style: none;
+}
+
+.wm-nav-link {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text-main);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.wm-nav-link:hover, .wm-nav-link.active {
+  color: var(--wm-red);
+  background: var(--wm-red-light);
+}
+
+.wm-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.wm-location-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-main);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-location-pill:hover {
+  border-color: var(--wm-red);
+  color: var(--wm-red);
+}
+
+.wm-btn-sell {
+  background: var(--wm-red);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-btn-sell:hover {
+  background: var(--wm-red-hover);
+  transform: translateY(-1px);
+}
+
+/* Sub-header de Inteligência de Mercado */
+.wm-ticker {
+  background: #1A1D23;
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  padding: 8px 20px;
+}
+
+.wm-ticker-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wm-ticker-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.wm-ticker-highlight {
+  color: #34D399;
+}
+
+/* ==========================================================================
+   2. HERO SEARCH BAR
+   ========================================================================== */
+.wm-hero-search {
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--bg-main) 100%);
+  padding: 28px 20px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.wm-hero-container {
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.wm-search-box {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 6px 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.wm-search-box:focus-within {
+  border-color: var(--wm-red);
+  box-shadow: 0 0 0 3px rgba(225, 17, 56, 0.15);
+}
+
+.wm-search-icon {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  margin-right: 12px;
+}
+
+.wm-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1.05rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.wm-search-btn {
+  background: var(--wm-red);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.wm-search-btn:hover {
+  background: var(--wm-red-hover);
+}
+
+.wm-quick-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.wm-quick-tag-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.wm-tag-pill {
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-tag-pill:hover, .wm-tag-pill.active {
+  background: var(--wm-red-light);
+  border-color: var(--wm-red-border);
+  color: var(--wm-red);
+}
+
+.wm-tag-pill.bargain {
+  background: var(--deal-emerald-bg);
+  border-color: var(--deal-emerald-border);
+  color: var(--deal-emerald-text);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   3. LAYOUT PRINCIPAL (SIDEBAR + GRID)
+   ========================================================================== */
+.wm-main-layout {
+  max-width: 1360px;
+  margin: 24px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+}
+
+/* BARRA LATERAL DE FILTROS */
+.wm-sidebar {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  height: fit-content;
+  position: sticky;
+  top: 96px;
+}
+
+.wm-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.wm-filter-title {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.wm-btn-reset {
+  background: none;
+  border: none;
+  color: var(--wm-red);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wm-filter-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.wm-filter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.wm-filter-label {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Filtro Especial: Radar de Oportunidades */
+.wm-deal-filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wm-deal-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-deal-option:hover, .wm-deal-option.active {
+  border-color: var(--wm-red);
+  background: var(--wm-red-light);
+}
+
+.wm-deal-option.pechincha-opt {
+  border-color: var(--deal-emerald-border);
+  background: var(--deal-emerald-bg);
+  color: var(--deal-emerald-text);
+}
+
+/* Filtros de Seleção (Dropdown / Pills) */
+.wm-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+  background-color: #FFFFFF;
+  outline: none;
+  cursor: pointer;
+}
+
+.wm-select:focus {
+  border-color: var(--wm-red);
+}
+
+.wm-pill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.wm-pill-btn {
+  background: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-pill-btn:hover, .wm-pill-btn.active {
+  background: var(--wm-red);
+  color: #FFFFFF;
+  border-color: var(--wm-red);
+}
+
+.wm-range-slider {
+  width: 100%;
+  accent-color: var(--wm-red);
+  margin: 8px 0;
+}
+
+.wm-range-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   4. GRID DE ANÚNCIOS & CARDS WEBMOTORS
+   ========================================================================== */
+.wm-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: #FFFFFF;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.wm-count-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.wm-count-text span {
+  color: var(--wm-red);
+}
+
+.wm-sort-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.wm-sort-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  outline: none;
+}
+
+.wm-car-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 22px;
+}
+
+/* CARD DE VEÍCULO WEBMOTORS COM ANALYTICS */
+.wm-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+.wm-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: #D1D5DB;
+}
+
+/* Imagem e Selos de Foto */
+.wm-card-media {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #E5E7EB;
+  overflow: hidden;
+}
+
+.wm-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.wm-card:hover .wm-card-img {
+  transform: scale(1.03);
+}
+
+.wm-deal-ribbon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 2;
+}
+
+.wm-deal-ribbon.emerald {
+  background: #059669;
+  color: #FFFFFF;
+}
+
+.wm-deal-ribbon.blue {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+.wm-deal-ribbon.amber {
+  background: #D97706;
+  color: #FFFFFF;
+}
+
+.wm-deal-ribbon.slate {
+  background: #4B5563;
+  color: #FFFFFF;
+}
+
+.wm-price-drop-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #DC2626;
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+.wm-favorite-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6B7280;
+  transition: all var(--transition-fast);
+  z-index: 2;
+}
+
+.wm-favorite-btn:hover {
+  color: var(--wm-red);
+  background: #FFFFFF;
+  transform: scale(1.1);
+}
+
+/* Corpo do Card */
+.wm-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.wm-card-title-group {
+  margin-bottom: 8px;
+}
+
+.wm-card-make-model {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text-main);
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.wm-card-version {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.wm-card-price-row {
+  margin: 10px 0 6px;
+}
+
+.wm-card-price {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.wm-card-installment {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.wm-card-installment strong {
+  color: var(--wm-red);
+}
+
+/* Barra de Spread Analítico */
+.wm-spread-bar-container {
+  margin: 10px 0;
+  background: #F3F4F6;
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.wm-spread-text {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.wm-spread-diff {
+  font-weight: 800;
+}
+
+.wm-spread-diff.good {
+  color: #059669;
+}
+
+.wm-spread-diff.fair {
+  color: #2563EB;
+}
+
+.wm-spread-diff.above {
+  color: #D97706;
+}
+
+/* Especificações Rápidas */
+.wm-card-specs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.wm-card-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+/* Botões de Ação do Card */
+.wm-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.wm-btn-details {
+  background: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-strong);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.wm-btn-details:hover {
+  background: #E5E7EB;
+}
+
+.wm-btn-analytics {
+  background: #10B981;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all var(--transition-fast);
+}
+
+.wm-btn-analytics:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* Paginação */
+.wm-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 36px 0;
+}
+
+.wm-page-btn {
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wm-page-btn:hover, .wm-page-btn.active {
+  background: var(--wm-red);
+  color: #FFFFFF;
+  border-color: var(--wm-red);
+}
+
+.wm-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   5. MODAL DE DETALHES DO VEÍCULO & RAIO-X ANALÍTICO
+   ========================================================================== */
+.wm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.wm-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wm-modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  max-width: 960px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  transform: scale(0.95);
+  transition: transform 0.25s ease;
+}
+
+.wm-modal-backdrop.open .wm-modal-content {
+  transform: scale(1);
+}
+
+.wm-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #F3F4F6;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background var(--transition-fast);
+}
+
+.wm-modal-close:hover {
+  background: #E5E7EB;
+}
+
+.wm-modal-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 28px;
+  padding: 24px;
+}
+
+.wm-modal-gallery {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #E5E7EB;
+}
+
+.wm-modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wm-modal-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 10px 0;
+}
+
+.wm-modal-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+  background: var(--bg-main);
+  padding: 14px;
+  border-radius: var(--radius-md);
+}
+
+.wm-spec-item {
+  font-size: 0.82rem;
+}
+
+.wm-spec-label {
+  color: var(--text-muted);
+  display: block;
+}
+
+.wm-spec-value {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Painel de Analytics Embutido no Modal */
+.wm-analytics-drawer {
+  grid-column: 1 / -1;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  margin-top: 10px;
+}
+
+.wm-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.wm-analytics-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wm-analytics-grid-2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+}
+
+.wm-chart-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.wm-chart-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #1E293B;
+}
+
+/* Tabela de Arbitragem */
+.wm-arb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.wm-arb-table th {
+  text-align: left;
+  padding: 8px;
+  background: #F1F5F9;
+  font-weight: 700;
+  color: #475569;
+}
+
+.wm-arb-table td {
+  padding: 8px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+/* ==========================================================================
+   6. RESPONSIVIDADE (MOBILE & TABLET)
+   ========================================================================== */
+@media (max-width: 960px) {
+  .wm-main-layout {
+    grid-template-columns: 1fr;
+  }
+  .wm-sidebar {
+    position: static;
+  }
+  .wm-modal-grid {
+    grid-template-columns: 1fr;
+  }
+  .wm-analytics-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .wm-nav-links {
+    display: none;
+  }
+}

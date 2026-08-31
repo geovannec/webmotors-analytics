@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebMotors | Carros Novos e Usados com Inteligência Analítica de Preço</title>
+  <meta name="description" content="A maior plataforma automotiva do Brasil reconstruída com inteligência de mercado embutida: encontre pechinchas, avalie curvas de depreciação e veja arbitragem interestadual.">
+  
+  <!-- Estilos & Fontes -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js para os gráficos embutidos no modal -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- 1. TICKER DE INTELIGÊNCIA EM TEMPO REAL -->
+  <div class="wm-ticker">
+    <div class="wm-ticker-container">
+      <div class="wm-ticker-tag">
+        <i class="fa-solid fa-bolt text-warning"></i>
+        <span>Mercado ao Vivo:</span>
+        <strong id="tickerTotalVeiculos">1.783</strong> veículos monitorados em <strong id="tickerTotalMarcas">32</strong> marcas
+      </div>
+      <div class="wm-ticker-tag">
+        <i class="fa-solid fa-arrow-trend-down wm-ticker-highlight"></i>
+        <span id="tickerPechinchas"><strong>174 oportunidades</strong> com preço >= 10% abaixo da média</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. NAVBAR OFICIAL WEBMOTORS -->
+  <header class="wm-navbar">
+    <div class="wm-nav-container">
+      <a href="/" class="wm-logo-group">
+        <span class="wm-logo-badge">web</span>
+        <span class="wm-logo-text">motors</span>
+        <span class="wm-logo-analytics"><i class="fa-solid fa-chart-line"></i> Analytics</span>
+      </a>
+
+      <nav>
+        <ul class="wm-nav-links">
+          <li><a href="#" class="wm-nav-link active">Comprar</a></li>
+          <li><a href="#" class="wm-nav-link">Vender</a></li>
+          <li><a href="#" class="wm-nav-link">Serviços</a></li>
+          <li><a href="#" class="wm-nav-link">Financiamento</a></li>
+          <li><a href="#" class="wm-nav-link">Tabela FIPE</a></li>
+        </ul>
+      </nav>
+
+      <div class="wm-nav-actions">
+        <div class="wm-location-pill" id="locationSelector">
+          <i class="fa-solid fa-location-dot"></i>
+          <span id="currentLocationText">Brasil (Todas UFs)</span>
+        </div>
+        <button class="wm-btn-sell">
+          <i class="fa-solid fa-plus"></i> Vender meu Carro
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. HERO SEARCH -->
+  <section class="wm-hero-search">
+    <div class="wm-hero-container">
+      <div class="wm-search-box">
+        <i class="fa-solid fa-magnifying-glass wm-search-icon"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="wm-search-input" 
+          placeholder="Digite a marca, modelo ou versão do carro (ex: Corolla, HB20, Onix, Compass)..."
+          autocomplete="off"
+        >
+        <button class="wm-search-btn" id="searchBtn">
+          Buscar
+        </button>
+      </div>
+
+      <!-- Tags de Busca Rápida -->
+      <div class="wm-quick-tags">
+        <span class="wm-quick-tag-label">Atalhos rápidos:</span>
+        <button class="wm-tag-pill bargain" data-deal="pechincha">
+          <i class="fa-solid fa-fire"></i> Super Oportunidades (-10%+)
+        </button>
+        <button class="wm-tag-pill" data-price="80000">Até R$ 80 mil</button>
+        <button class="wm-tag-pill" data-price="120000">Até R$ 120 mil</button>
+        <button class="wm-tag-pill" data-search="SUV">SUVs</button>
+        <button class="wm-tag-pill" data-search="Híbrido">Híbridos & Elétricos</button>
+        <button class="wm-tag-pill" data-km="30000">Menos de 30.000 km</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. LAYOUT PRINCIPAL -->
+  <main class="wm-main-layout">
+    
+    <!-- BARRA LATERAL DE FILTROS -->
+    <aside class="wm-sidebar">
+      <div class="wm-filter-header">
+        <span class="wm-filter-title">Filtros</span>
+        <button class="wm-btn-reset" id="resetFiltersBtn">Limpar Tudo</button>
+      </div>
+
+      <!-- Filtro Exclusivo: Inteligência de Preço -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">
+          <span>🎯 Radar de Preço</span>
+          <small style="color: var(--wm-red); font-size: 0.7rem;">EXCLUSIVO</small>
+        </label>
+        <div class="wm-deal-filter-options">
+          <div class="wm-deal-option active" data-deal="">
+            <i class="fa-solid fa-list"></i> Todos os Anúncios
+          </div>
+          <div class="wm-deal-option pechincha-opt" data-deal="pechincha">
+            <i class="fa-solid fa-arrow-trend-down"></i> Pechinchas (>= 10% abaixo)
+          </div>
+          <div class="wm-deal-option" data-deal="justo">
+            <i class="fa-solid fa-check"></i> Preço Justo (Na Média)
+          </div>
+          <div class="wm-deal-option" data-deal="acima">
+            <i class="fa-solid fa-arrow-trend-up"></i> Acima da Média
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtro de Estado (UF) -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">Estado (UF)</label>
+        <div class="wm-pill-grid" id="ufPillGrid">
+          <div class="wm-pill-btn active" data-uf="">TODAS</div>
+          <div class="wm-pill-btn" data-uf="SP">SP</div>
+          <div class="wm-pill-btn" data-uf="PR">PR</div>
+          <div class="wm-pill-btn" data-uf="RJ">RJ</div>
+          <div class="wm-pill-btn" data-uf="MG">MG</div>
+          <div class="wm-pill-btn" data-uf="SC">SC</div>
+          <div class="wm-pill-btn" data-uf="RS">RS</div>
+        </div>
+      </div>
+
+      <!-- Filtro de Marca -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">Marca</label>
+        <select id="brandSelect" class="wm-select">
+          <option value="">Todas as Marcas</option>
+        </select>
+      </div>
+
+      <!-- Filtro de Modelo -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">Modelo</label>
+        <select id="modelSelect" class="wm-select" disabled>
+          <option value="">Selecione uma marca primeiro</option>
+        </select>
+      </div>
+
+      <!-- Preço Máximo -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">
+          <span>Preço Máximo</span>
+          <span id="priceDisplay" style="color: var(--wm-red);">R$ 500.000</span>
+        </label>
+        <input type="range" id="priceRange" class="wm-range-slider" min="20000" max="600000" step="5000" value="600000">
+        <div class="wm-range-values">
+          <span>R$ 20 mil</span>
+          <span>R$ 600 mil+</span>
+        </div>
+      </div>
+
+      <!-- Ano Modelo -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">Ano Modelo</label>
+        <div style="display: flex; gap: 8px;">
+          <select id="yearMinSelect" class="wm-select">
+            <option value="">De</option>
+          </select>
+          <select id="yearMaxSelect" class="wm-select">
+            <option value="">Até</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quilometragem Máxima -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">
+          <span>KM Máxima</span>
+          <span id="kmDisplay" style="color: var(--text-main);">Até 150.000 km</span>
+        </label>
+        <input type="range" id="kmRange" class="wm-range-slider" min="0" max="200000" step="10000" value="200000">
+      </div>
+
+      <!-- Tipo de Vendedor -->
+      <div class="wm-filter-section">
+        <label class="wm-filter-label">Tipo de Vendedor</label>
+        <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="seller-checkbox" value="CONCESSIONARIA"> Concessionária
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="seller-checkbox" value="LOJA"> Loja de Veículos
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="seller-checkbox" value="PESSOA FISICA"> Particular
+          </label>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- GRID DE RESULTADOS -->
+    <section>
+      <div class="wm-results-header">
+        <div class="wm-count-text">
+          <span id="totalCarsCount">0</span> carros encontrados
+        </div>
+
+        <div class="wm-sort-group">
+          <span>Ordenar por:</span>
+          <select id="sortSelect" class="wm-sort-select">
+            <option value="deal_desc">Maior Oportunidade (Desconto %)</option>
+            <option value="price_asc">Menor Preço</option>
+            <option value="price_desc">Maior Preço</option>
+            <option value="km_asc">Menor Quilometragem</option>
+            <option value="year_desc">Ano Mais Recente</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Grid de Cards de Carros -->
+      <div id="carGrid" class="wm-car-grid">
+        <!-- Injetado dinamicamente via app.js -->
+      </div>
+
+      <!-- Paginação -->
+      <div id="pagination" class="wm-pagination">
+        <!-- Injetado dinamicamente via app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 5. MODAL DE DETALHES DO VEÍCULO & RAIO-X ANALÍTICO -->
+  <div id="carModal" class="wm-modal-backdrop">
+    <div class="wm-modal-content">
+      <button id="modalCloseBtn" class="wm-modal-close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div id="modalBody" class="wm-modal-grid">
+        <!-- Carregado dinamicamente via app.js -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

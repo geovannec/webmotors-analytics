@@ -1,14 +1,16 @@
 version: "3.8"
 
 services:
-  crawler:
-    image: webmotors-crawler:latest
+  web:
+    image: webmotors-web:latest
     build:
       context: https://github.com/geovannec/webmotors-analytics.git#main
       dockerfile: Dockerfile
-    container_name: webmotors_crawler
+    container_name: webmotors_web
     restart: always
-    command: python run_daemon.py --interval 3600 --tier 1 --brands-cat volume --pages-per-shard 2
+    command: uvicorn web.server:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
     volumes:
       - webmotors_data:/app/data
 
@@ -22,6 +24,17 @@ services:
     command: streamlit run app/dashboard.py --server.port 8501 --server.address 0.0.0.0
     ports:
       - "8501:8501"
+    volumes:
+      - webmotors_data:/app/data
+
+  crawler:
+    image: webmotors-crawler:latest
+    build:
+      context: https://github.com/geovannec/webmotors-analytics.git#main
+      dockerfile: Dockerfile
+    container_name: webmotors_crawler
+    restart: always
+    command: python run_daemon.py --interval 3600 --tier 1 --brands-cat volume --pages-per-shard 2
     volumes:
       - webmotors_data:/app/data
 
