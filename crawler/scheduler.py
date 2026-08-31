@@ -119,22 +119,20 @@ class CrawlerDaemon:
         })
 
         try:
-            # 1. Shards por estoque geral de cada UF (captura todos os novos anúncios de todas as marcas)
-            shards_geral = [(uf, None) for uf in (UFS_TIER_1 if self.tier == "1" else ALL_UFS)]
-            
-            # 2. Shards detalhados por marca para profundidade de catálogo
-            shards_marcas = self.orchestrator.build_shards(tier=self.tier, brands_category=self.brands_cat)
-            
-            # Shards combinados: primeiro geral por UF, depois por marcas
-            todos_os_shards = shards_geral + shards_marcas
+            # Shards direcionados por marca para evitar disparo de WAF e sobrecarga
+            todos_os_shards = self.orchestrator.build_shards(tier=self.tier, brands_category=self.brands_cat)
 
-            logger.info(f"📋 Total de partições mapeadas para este ciclo: {len(todos_os_shards)}")
+            logger.info(f"📋 Total de partições por marca mapeadas para este ciclo: {len(todos_os_shards)}")
 
             resultado = await self.orchestrator.run(
                 shards=todos_os_shards,
                 pages_per_shard=self.pages_per_shard,
-                resume=False,  # Cada ciclo horário faz uma varredura nova e sincroniza
+                resume=True,  # Retoma de onde parou caso haja interrupção
+                delay_min=1.8,
+                delay_max=3.2,
             )
+            # Limpar checkpoint ao final do ciclo para a próxima hora
+            self.orchestrator.checkpoint_mgr.clear()
 
             fim = datetime.now()
             self.db.finalizar_execucao(

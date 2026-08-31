@@ -12,9 +12,9 @@ CHECKPOINT_PATH = DATA_DIR / "crawler_checkpoint.json"
 # Parâmetros padrão do Crawler
 DEFAULT_UF = "sp"
 DEFAULT_CITY = "São Paulo"
-DEFAULT_DELAY_MIN = 0.8
-DEFAULT_DELAY_MAX = 1.8
-MAX_PAGES_PER_RUN = 50
+DEFAULT_DELAY_MIN = 1.8
+DEFAULT_DELAY_MAX = 3.2
+MAX_PAGES_PER_RUN = 100
 
 # User agent e viewport padrão
 USER_AGENT = (
