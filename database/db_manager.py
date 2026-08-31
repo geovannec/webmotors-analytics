@@ -33,6 +33,20 @@ class DatabaseManager:
         try:
             with self.get_connection() as conn:
                 conn.execute(sql_script)
+
+                # Se existir seed_data (por exemplo dentro do container Docker), sincronizar anúncios que faltam
+                seed_path = BASE_DIR / "seed_data" / "webmotors.duckdb"
+                if seed_path.exists() and str(seed_path) != str(self.db_path):
+                    try:
+                        conn.execute(f"ATTACH '{seed_path}' AS seed (READ_ONLY)")
+                        conn.execute("""
+                            INSERT OR IGNORE INTO anuncios SELECT * FROM seed.anuncios;
+                            INSERT OR IGNORE INTO historico_precos SELECT * FROM seed.historico_precos;
+                        """)
+                        conn.execute("DETACH seed")
+                        logger.info(f"✅ Sincronizado banco com seed_data ({seed_path}).")
+                    except Exception as ex_seed:
+                        logger.warning(f"Aviso ao sincronizar seed_data: {ex_seed}")
         except Exception as e:
             logger.warning(f"Aviso ao inicializar DB: {e}")
 
