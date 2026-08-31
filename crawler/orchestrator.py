@@ -177,6 +177,14 @@ class NationalCrawlerOrchestrator:
                 )
 
                 if not veiculos:
+                    # Fallback com navegador persistente (In-Page Session)
+                    veiculos = await self.scraper.scrape_in_page_api(
+                        uf=uf,
+                        pagina=pag,
+                        marca=marca,
+                    )
+
+                if not veiculos:
                     # Não há mais anúncios nessa fatia
                     break
 

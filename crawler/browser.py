@@ -10,6 +10,46 @@ class BrowserFactory:
     """Gerenciador de navegador Playwright com perfil stealth anti-detecção"""
 
     @staticmethod
+    async def create_persistent_context(playwright_instance, user_data_dir: str, headless: bool = True) -> BrowserContext:
+        """Cria ou recupera um contexto de navegador persistente salvo no disco (mantém cookies do PerimeterX)"""
+        args = [
+            "--disable-blink-features=AutomationControlled",
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-infobars",
+            "--window-position=0,0",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--no-first-run",
+            "--no-default-browser-check",
+        ]
+
+        context: BrowserContext = await playwright_instance.chromium.launch_persistent_context(
+            user_data_dir=user_data_dir,
+            headless=headless,
+            args=args,
+            user_agent=USER_AGENT,
+            viewport=VIEWPORT,
+            locale="pt-BR",
+            timezone_id="America/Sao_Paulo",
+            color_scheme="light",
+            extra_http_headers={
+                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            },
+        )
+
+        await context.add_init_script(
+            """
+            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+            Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+            Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt', 'en-US', 'en'] });
+            window.chrome = { runtime: {}, loadTimes: function() {}, csi: function() {}, app: {} };
+            """
+        )
+
+        return context
+
+    @staticmethod
     async def create_context(playwright_instance, headless: bool = True) -> BrowserContext:
         args = [
             "--disable-blink-features=AutomationControlled",

@@ -7,10 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependências Python
+# Instalar dependências Python e binários do Playwright Chromium
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    playwright install --with-deps chromium
 
 # Copiar código da aplicação e preservar seed do banco de dados
 COPY . .

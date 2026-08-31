@@ -14,7 +14,7 @@ try:
 except ImportError:
     HAS_CURL_CFFI = False
 
-from config.settings import DEFAULT_UF, DEFAULT_CITY, DEFAULT_DELAY_MIN, DEFAULT_DELAY_MAX, USER_AGENT
+from config.settings import DEFAULT_UF, DEFAULT_CITY, DEFAULT_DELAY_MIN, DEFAULT_DELAY_MAX, USER_AGENT, DATA_DIR
 from crawler.browser import BrowserFactory
 from crawler.parser import WebmotorsParser
 from database.db_manager import DatabaseManager
@@ -40,6 +40,10 @@ class WebmotorsScraper:
     def __init__(self, db_manager: Optional[DatabaseManager] = None):
         self.db = db_manager or DatabaseManager()
         self.intercepted_items: List[Dict[str, Any]] = []
+        self._pw_instance = None
+        self._pw_context = None
+        self._pw_page = None
+        self.browser_dir = str(DATA_DIR / "browser_profile")
         self._init_session()
 
     def _init_session(self):
@@ -54,6 +58,100 @@ class WebmotorsScraper:
             self.http_session = requests.Session()
             if self.proxies:
                 self.http_session.proxies.update(self.proxies)
+
+    async def _ensure_browser_session(self):
+        """Garante uma sessão Chromium com perfil persistente para contornar WAF via in-page execution"""
+        if self._pw_page is None:
+            logger.info(f"🌐 Inicializando navegador Chromium persistente em: {self.browser_dir}")
+            self._pw_instance = await async_playwright().start()
+            self._pw_context = await BrowserFactory.create_persistent_context(
+                self._pw_instance,
+                user_data_dir=self.browser_dir,
+                headless=True,
+            )
+            self._pw_page = await self._pw_context.new_page()
+            # Navegar para página inicial do Webmotors para carregar contexto e tokens
+            try:
+                await self._pw_page.goto("https://www.webmotors.com.br/carros/sp", wait_until="domcontentloaded", timeout=40000)
+                await asyncio.sleep(3)
+            except Exception as e:
+                logger.warning(f"Aviso ao inicializar página base no navegador: {e}")
+
+    async def close_browser(self):
+        """Fecha o navegador persistente com segurança"""
+        if self._pw_context:
+            try:
+                await self._pw_context.close()
+            except Exception:
+                pass
+        if self._pw_instance:
+            try:
+                await self._pw_instance.stop()
+            except Exception:
+                pass
+        self._pw_page = None
+        self._pw_context = None
+        self._pw_instance = None
+
+    async def scrape_in_page_api(
+        self,
+        uf: str = "sp",
+        pagina: int = 1,
+        marca: Optional[str] = None,
+        ano_min: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """Executa a busca dentro do contexto do Chromium persistente, com tokens nativos do PerimeterX"""
+        try:
+            await self._ensure_browser_session()
+
+            base_search_url = f"https://www.webmotors.com.br/carros/{uf.lower()}"
+            if marca:
+                base_search_url += f"/{marca.lower()}"
+
+            query_params = ["tipoveiculo=carros"]
+            if ano_min:
+                query_params.append(f"anoinicial={ano_min}")
+
+            inner_url = f"{base_search_url}?{'&'.join(query_params)}"
+            target_api_url = f"https://www.webmotors.com.br/api/search/car?url={inner_url}&actualPage={pagina}"
+
+            # Executar fetch dentro do navegador (origem autêntica com cookies criptografados)
+            res_data = await self._pw_page.evaluate(
+                """async (url) => {
+                    try {
+                        const res = await fetch(url, {
+                            headers: {
+                                'Accept': 'application/json, text/plain, */*',
+                                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+                            }
+                        });
+                        if (res.status === 200) {
+                            return await res.json();
+                        } else {
+                            return { status: res.status, error: true };
+                        }
+                    } catch(err) {
+                        return { error: err.message };
+                    }
+                }""",
+                target_api_url,
+            )
+
+            if isinstance(res_data, dict) and not res_data.get("error"):
+                items = res_data.get("SearchResults", []) or []
+                collected = []
+                for item in items:
+                    parsed = WebmotorsParser.parse_json_item(item)
+                    if parsed and parsed.get("id_anuncio"):
+                        collected.append(parsed)
+                if collected:
+                    logger.info(f"[Browser-API] Página {pagina} ({uf.upper()}{' - ' + marca.upper() if marca else ''}): {len(collected)} veículos.")
+                    return collected
+
+        except Exception as e:
+            logger.warning(f"[Browser-API] Erro ao executar in-page fetch: {e}")
+
+        return []
 
     def scrape_api_page(
         self,
