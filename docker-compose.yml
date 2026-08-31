@@ -2,18 +2,12 @@ version: "3.8"
 
 services:
   warp:
-    image: caomingjun/warp:latest
+    image: ghcr.io/kingcc/warproxy:latest
     container_name: webmotors_warp
     restart: always
     environment:
-      - WARP_SLEEP=2
-    cap_add:
-      - NET_ADMIN
-    sysctls:
-      - net.ipv6.conf.all.disable_ipv6=0
-      - net.ipv4.conf.all.src_valid_mark=1
-    volumes:
-      - warp_data:/var/lib/cloudflare-warp
+      - SOCKS5_PORT=1080
+      - TZ=America/Sao_Paulo
 
   web:
     image: webmotors-web:latest
@@ -60,4 +54,3 @@ services:
 
 volumes:
   webmotors_data:
-  warp_data:
