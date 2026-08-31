@@ -14,16 +14,27 @@ class DatabaseManager:
         self.db_path = str(db_path)
         self._init_db()
 
-    def get_connection(self):
-        return duckdb.connect(self.db_path)
+    def get_connection(self, read_only: bool = False):
+        import time
+        for attempt in range(5):
+            try:
+                return duckdb.connect(str(self.db_path), read_only=read_only)
+            except duckdb.IOException:
+                if attempt == 4:
+                    # Fallback final para modo somente leitura
+                    return duckdb.connect(str(self.db_path), read_only=True)
+                time.sleep(0.3)
 
     def _init_db(self):
         """Inicializa as tabelas no DuckDB usando o schema.sql"""
         with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             sql_script = f.read()
 
-        with self.get_connection() as conn:
-            conn.execute(sql_script)
+        try:
+            with self.get_connection() as conn:
+                conn.execute(sql_script)
+        except Exception as e:
+            logger.warning(f"Aviso ao inicializar DB: {e}")
 
     def upsert_anuncios(self, anuncios: List[Dict[str, Any]]) -> Dict[str, int]:
         """
@@ -232,7 +243,7 @@ class DatabaseManager:
 
     def get_historico_execucoes(self, limit: int = 10) -> pd.DataFrame:
         """Retorna os logs das últimas execuções"""
-        with self.get_connection() as conn:
+        with self.get_connection(read_only=True) as conn:
             return conn.execute(
                 f"""
                 SELECT id_execucao, data_inicio, data_fim, uf, marca,
@@ -245,12 +256,12 @@ class DatabaseManager:
 
     def get_dataframe(self, query: str = "SELECT * FROM anuncios") -> pd.DataFrame:
         """Executa uma query analítica e retorna como Pandas DataFrame"""
-        with self.get_connection() as conn:
+        with self.get_connection(read_only=True) as conn:
             return conn.execute(query).fetchdf()
 
     def get_metricas_gerais(self) -> Dict[str, Any]:
         """Retorna resumo estatístico da base"""
-        with self.get_connection() as conn:
+        with self.get_connection(read_only=True) as conn:
             res = conn.execute(
                 """
                 SELECT 

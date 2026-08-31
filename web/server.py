@@ -38,7 +38,7 @@ STATIC_DIR.mkdir(parents=True, exist_ok=True)
 @app.get("/api/summary")
 def get_summary():
     """Retorna métricas globais de mercado para o header da WebMotors"""
-    with db.get_connection() as conn:
+    with db.get_connection(read_only=True) as conn:
         res = conn.execute(
             """
             SELECT 
@@ -80,7 +80,7 @@ def get_summary():
 @app.get("/api/filters/facets")
 def get_facets():
     """Retorna opções e contadores para a barra lateral de filtros da WebMotors"""
-    with db.get_connection() as conn:
+    with db.get_connection(read_only=True) as conn:
         # Marcas com contagem
         marcas = conn.execute(
             """
@@ -140,7 +140,7 @@ def get_models(marca: str):
     """Retorna a lista de modelos e respectivas contagens para uma marca selecionada."""
     if not marca:
         return {"models": []}
-    with db.get_connection() as conn:
+    with db.get_connection(read_only=True) as conn:
         rows = conn.execute(
             """
             SELECT modelo, count(*) as total
@@ -295,7 +295,7 @@ def get_cars(
     count_query = f"SELECT count(*) FROM ({query})"
     paginated_query = f"{query} ORDER BY {order_sql} LIMIT {l} OFFSET {offset}"
 
-    with db.get_connection() as conn:
+    with db.get_connection(read_only=True) as conn:
         total = conn.execute(count_query, params).fetchone()[0]
         rows = conn.execute(paginated_query, params).fetchall()
 
@@ -431,7 +431,7 @@ def get_car_detail(
     Retorna o perfil completo de um veículo específico mais todo o seu
     Raio-X de Inteligência Analítica (Curva de Depreciação, Arbitragem Interestadual, Histórico, Viagem e TCO).
     """
-    with db.get_connection() as conn:
+    with db.get_connection(read_only=True) as conn:
         car = conn.execute(
             """
             SELECT id_anuncio, marca, modelo, versao, ano_fabricacao, ano_modelo,
